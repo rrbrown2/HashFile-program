@@ -1,0 +1,95 @@
+/
+/* Purpose:  counts the number of times each NON-WHITESPACE character occurs, then
+computes a single integer (long) value based on the character
+code and occurrence frequency of each such character.
+
+*/
+
+//
+//------------------------------------------------------------------
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+using namespace std;
+
+void processFile(char* fileName, map<char, int> &mapOfChars) 
+{
+  string line;
+  ifstream infile (fileName);
+  if (infile.is_open())
+  {
+    while ( getline (infile,line) )
+    {
+      for(char c : line) 
+      {
+        if(c != ' ') // if not space
+        {
+          if(mapOfChars.find(c) != mapOfChars.end()) 
+          {
+            mapOfChars[c]++;
+          }
+          else 
+          {
+            mapOfChars.insert(make_pair(c,1));
+          }
+        }
+      }
+    }
+    infile.close();
+  }
+
+  else cout << "Unable to open file"; 
+}
+
+long calculateHashValue(map<char, int> &mapOfChars)
+{
+  int hash = 0;
+
+  map<char, int>::iterator it = mapOfChars.begin();
+  while(it != mapOfChars.end())
+  {
+    hash += it->first * it->second;
+    it++;
+  }
+
+  return hash;
+}
+
+void printResults(char* filename, map<char, int> &mapOfChars, long hashValue)
+{
+  cout << "SYMBOL FREQUENCIES: \n\n";
+  int count = 0;
+  map<char, int>::iterator it = mapOfChars.begin();
+  while(it != mapOfChars.end())
+  {
+    cout << it->second << it->first << "\t";
+    count = (count+1)%10;
+    if(count == 0)
+      cout << "\n";
+    it++;
+  }
+
+  cout << "\n";
+  if(count != 0)
+    cout << "\n";
+  cout << filename << " HASH VALUE = " << hashValue << "\n";
+}
+
+int main (int argc, char* argv[]) 
+{
+
+  if(argc < 2) 
+  {
+    cout << "Usage: " << argv[0] << " file_name" << std::endl;
+    return 1;
+  }
+
+  map<char, int> mapOfChars;
+  processFile(argv[1], mapOfChars);
+  long hashValue = calculateHashValue(mapOfChars);
+  printResults(argv[1], mapOfChars, hashValue);
+
+  return 0;
+}
